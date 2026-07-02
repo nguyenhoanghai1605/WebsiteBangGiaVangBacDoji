@@ -145,13 +145,26 @@
   // --- LOGIC CẬP NHẬT VIDEO TỰ ĐỘNG ---
   const defaultVideoUrl = 'https://cdn.hstatic.net/files/1000381168/file/tgkc_3clip.mp4';
   const videoElement = document.getElementById('dynamic-video');
+  const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyF92Nc-WqbaXGQYPYF9PfX4uQBTCaCZqxMnl7WPqsfoNY3fElxsvYsWWKcMtqiDH7V/exec';
 
-  function updateVideoUrl() {
-      // Đọc URL từ LocalStorage, nếu chưa cấu hình thì lấy link mặc định
-      const configuredUrl = localStorage.getItem('videoConfigUrl') || defaultVideoUrl;
+  async function fetchVideoConfig() {
+      try {
+          const response = await fetch(APP_SCRIPT_URL);
+          const data = await response.json();
+          if (data && data.url) {
+              return data.url;
+          }
+      } catch (err) {
+          console.error("Lỗi lấy cấu hình video từ server:", err);
+      }
+      // Khôi phục từ localStorage nếu gọi API thất bại
+      return localStorage.getItem('videoConfigUrl') || defaultVideoUrl;
+  }
+
+  async function updateVideoUrl() {
+      const configuredUrl = await fetchVideoConfig();
       
       // Nếu link thay đổi so với hiện tại, thì mới load lại
-      // Lấy src đầy đủ (bao gồm cả origin) để so sánh hoặc thuộc tính getAttribute
       if (videoElement.getAttribute('src') !== configuredUrl) {
           videoElement.setAttribute('src', configuredUrl);
           videoElement.play().catch(e => console.log("Auto-play prevented", e));
@@ -168,8 +181,7 @@
       }
   });
 
-  // Ngoài ra, để an toàn (phòng trường hợp mở trên 2 cửa sổ không liên kết event),
-  // có thể dùng polling kiểm tra mỗi 10 giây (Tùy chọn)
+  // Tự động kiểm tra server mỗi 10 giây để đồng bộ với các máy khác
   setInterval(updateVideoUrl, 10000);
 
 </script>
