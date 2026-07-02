@@ -413,12 +413,25 @@
     }
 
     const defaultVideoUrl = 'https://cdn.hstatic.net/files/1000381168/file/tgkc_3clip.mp4';
+    const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyF92Nc-WqbaXGQYPYF9PfX4uQBTCaCZqxMnl7WPqsfoNY3fElxsvYsWWKcMtqiDH7V/exec';
 
     // Khởi tạo
-    function init() {
-        // Tải cấu hình hiện tại khi mở trang
+    async function init() {
+        // Tạm hiển thị link từ local trước để UI mượt
         const currentUrl = localStorage.getItem('videoConfigUrl');
         document.getElementById('videoUrl').value = currentUrl || defaultVideoUrl;
+
+        // Tải cấu hình mới nhất từ server
+        try {
+            const response = await fetch(APP_SCRIPT_URL);
+            const data = await response.json();
+            if(data && data.url) {
+                document.getElementById('videoUrl').value = data.url;
+                localStorage.setItem('videoConfigUrl', data.url);
+            }
+        } catch (err) {
+            console.error("Lỗi lấy cấu hình:", err);
+        }
         
         // Dọn dẹp lịch sử cũ hơn 30 ngày
         cleanOldHistory();
@@ -456,26 +469,43 @@
     }
 
     // Hành động lưu cấu hình
-    function saveConfig() {
+    async function saveConfig() {
         const url = document.getElementById('videoUrl').value.trim();
         const currentUrl = localStorage.getItem('videoConfigUrl') || defaultVideoUrl;
         
         if(url) {
-            // Chỉ lưu lịch sử nếu URL thực sự thay đổi
-            if(url !== currentUrl) {
-                localStorage.setItem('videoConfigUrl', url);
-                saveHistory(url);
-            } else if (!localStorage.getItem('videoConfigUrl')) {
-                // Trường hợp lưu lần đầu
-                localStorage.setItem('videoConfigUrl', url);
-                saveHistory(url);
+            const btn = document.querySelector('.btn-primary');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = 'Đang lưu...';
+            btn.disabled = true;
+
+            try {
+                // Chỉ lưu nếu URL thực sự thay đổi hoặc lưu lần đầu
+                if(url !== currentUrl || !localStorage.getItem('videoConfigUrl')) {
+                    // Gửi lên Server Apps Script
+                    await fetch(APP_SCRIPT_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({ url: url }),
+                        headers: {
+                            'Content-Type': 'text/plain;charset=utf-8' // Dùng text/plain để tránh lỗi CORS preflight
+                        }
+                    });
+
+                    localStorage.setItem('videoConfigUrl', url);
+                    saveHistory(url);
+                }
+                
+                const msg = document.getElementById('successMsg');
+                msg.style.display = 'flex';
+                setTimeout(() => {
+                    msg.style.display = 'none';
+                }, 3500);
+            } catch (err) {
+                alert("Có lỗi xảy ra khi lưu lên server: " + err.message);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
             }
-            
-            const msg = document.getElementById('successMsg');
-            msg.style.display = 'flex';
-            setTimeout(() => {
-                msg.style.display = 'none';
-            }, 3500);
         } else {
             alert('Vui lòng nhập đường dẫn video hợp lệ.');
         }
