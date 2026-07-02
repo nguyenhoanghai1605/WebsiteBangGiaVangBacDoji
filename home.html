@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gold and Silver Prices Signage - Home</title>
+<style>
+  /* Reset and base styles */
+  body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden; /* Ensure no scrollbars on the main page */
+  }
+
+  /* 
+   * Base wrapper for 27-inch portrait (1080x1920 resolution, 9:16 aspect ratio) 
+   * We will scale this wrapper to fit any smaller screen perfectly.
+   */
+  #scale-wrapper {
+    width: 1080px;
+    height: 1920px;
+    position: absolute;
+    transform-origin: top left;
+    background-color: #000;
+    overflow: hidden;
+  }
+
+  /* 
+   * The Layout Split
+   * Top 76.5%, Bottom 23.5% 
+   */
+  .top-container {
+    width: 100%;
+    height: 76.5%; 
+    overflow: hidden; /* Hide anything outside */
+    position: relative;
+    box-sizing: border-box;
+  }
+
+  .separator {
+    width: 100%;
+    height: 3.5%; 
+    /* Elegant DOJI-inspired Ruby Red and Gold gradient */
+    background: linear-gradient(90deg, #600000 0%, #D4AF37 50%, #600000 100%);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.8);
+    position: relative;
+    z-index: 10;
+  }
+
+  .bottom-container {
+    width: 100%;
+    height: 23.5%; 
+    overflow: hidden; 
+    position: relative;
+    box-sizing: border-box;
+  }
+
+  /* 
+   * Iframe settings
+   * We force them to be 1080x1920 so they render their portrait versions natively
+   * This prevents the DOJI site from triggering a mobile responsive layout.
+   */
+  iframe {
+    width: 1080px;
+    height: 1920px;
+    border: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  /* 
+   * Adjustments to fix white space and margins inside the iframes.
+   */
+  .gold-iframe {
+    width: 1440px !important;
+    height: 2000px !important;
+    transform: scale(0.75); 
+    transform-origin: top left;
+    margin: 0; 
+  }
+
+  .silver-iframe {
+    transform: scale(1.02);
+    transform-origin: top center;
+    margin-top: 5px; 
+  }
+
+  /* Video to fill the entire bottom area */
+  .demo-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Đảm bảo video lấp đầy toàn bộ khung mà không bị méo */
+    display: block;
+  }
+
+</style>
+</head>
+<body>
+
+  <!-- 1920x1080 Wrapper that scales to fit the screen -->
+  <div id="scale-wrapper">
+    
+    <!-- Top Container: Gold Price -->
+    <div class="top-container">
+      <iframe class="gold-iframe" src="https://banggialed.doji.vn/" scrolling="no"></iframe>
+    </div>
+
+    <!-- Bottom Container: Banner Video -->
+    <div class="bottom-container">
+      <video id="dynamic-video" class="demo-video" src="" autoplay loop muted playsinline></video>
+    </div>
+
+  </div>
+
+<script>
+  // Script to auto-scale the 1080x1920 wrapper to fit any screen size (responsive)
+  function resizeWrapper() {
+    const wrapper = document.getElementById('scale-wrapper');
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+    
+    const scaleX = windowWidth / 1080;
+    const scaleY = windowHeight / 1920;
+    const scale = Math.min(scaleX, scaleY);
+    
+    wrapper.style.transform = `scale(${scale})`;
+    
+    const offsetX = (windowWidth - 1080 * scale) / 2;
+    const offsetY = (windowHeight - 1920 * scale) / 2;
+    
+    wrapper.style.left = `${offsetX}px`;
+    wrapper.style.top = `${offsetY}px`;
+  }
+
+  window.addEventListener('resize', resizeWrapper);
+  resizeWrapper();
+
+  // --- LOGIC CẬP NHẬT VIDEO TỰ ĐỘNG ---
+  const defaultVideoUrl = 'https://cdn.hstatic.net/files/1000381168/file/tgkc_3clip.mp4';
+  const videoElement = document.getElementById('dynamic-video');
+
+  function updateVideoUrl() {
+      // Đọc URL từ LocalStorage, nếu chưa cấu hình thì lấy link mặc định
+      const configuredUrl = localStorage.getItem('videoConfigUrl') || defaultVideoUrl;
+      
+      // Nếu link thay đổi so với hiện tại, thì mới load lại
+      // Lấy src đầy đủ (bao gồm cả origin) để so sánh hoặc thuộc tính getAttribute
+      if (videoElement.getAttribute('src') !== configuredUrl) {
+          videoElement.setAttribute('src', configuredUrl);
+          videoElement.play().catch(e => console.log("Auto-play prevented", e));
+      }
+  }
+
+  // Chạy lần đầu khi mở trang
+  updateVideoUrl();
+
+  // Lắng nghe sự thay đổi của LocalStorage (khi admin bấm lưu ở tab khác)
+  window.addEventListener('storage', function(e) {
+      if (e.key === 'videoConfigUrl') {
+          updateVideoUrl();
+      }
+  });
+
+  // Ngoài ra, để an toàn (phòng trường hợp mở trên 2 cửa sổ không liên kết event),
+  // có thể dùng polling kiểm tra mỗi 10 giây (Tùy chọn)
+  setInterval(updateVideoUrl, 10000);
+
+</script>
+
+</body>
+</html>
