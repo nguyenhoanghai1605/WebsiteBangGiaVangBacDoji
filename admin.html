@@ -72,22 +72,40 @@
         }
 
         .logout-btn {
-            background-color: transparent;
-            color: var(--text-muted);
-            border: 1px solid var(--border-color);
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
             padding: 10px 20px;
             border-radius: 8px;
             font-size: 15px;
-            font-weight: 500;
-            width: 200px;
+            font-weight: 600;
+            width: auto;
             cursor: pointer;
             transition: all 0.2s ease;
+            box-shadow: 0 4px 6px rgba(139, 0, 0, 0.2);
+        }
+
+        @media screen and (max-width: 767px) {
+            .logout-btn {
+                background-color: var(--secondary-color);
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 8px;
+                font-size: 15px;
+                font-weight: 600;
+                width: 300px;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                box-shadow: 0 4px 6px rgba(139, 0, 0, 0.2);
+            }        
         }
 
         .logout-btn:hover {
-            background-color: #fff1f0;
-            color: #ff4d4f;
-            border-color: #ffa39e;
+            background-color: #a30000;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(139, 0, 0, 0.3);
         }
 
         .form-group {
@@ -378,6 +396,17 @@
         Đã lưu cấu hình thành công! Trang trình chiếu sẽ tự động cập nhật.
     </div>
 
+    <!-- <div class="footer">
+        Designed by <span>Nguyễn Hoàng Hải</span>
+    </div> -->
+
+    <!-- Video Preview -->
+    <div class="video-preview-container" style="margin-top: 30px; border-radius: 12px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border: 2px solid var(--border-color); background: #000;">
+        <video id="videoPreview" style="width: 100%; display: block; object-fit: cover; max-height: 400px;" autoplay loop muted playsinline></video>
+    </div>
+
+    <!-- Clock -->
+    <div id="realtimeClock" style="margin-top: 25px; text-align: center; font-size: 18px; font-weight: 600; color: var(--text-main); font-family: monospace;"></div>
     <div class="footer">
         Designed by <span>Nguyễn Hoàng Hải</span>
     </div>
@@ -404,12 +433,13 @@
             </table>
         </div>
     </div>
+    
 </div>
 
 <script>
     // Kiểm tra đăng nhập
     if (sessionStorage.getItem('isAdminLoggedIn') !== 'true') {
-        window.location.href = 'login.html';
+        window.location.href = 'index.html';
     }
 
     const defaultVideoUrl = 'https://cdn.hstatic.net/files/1000381168/file/tgkc_3clip.mp4';
@@ -417,9 +447,12 @@
 
     // Khởi tạo
     async function init() {
+        startClock();
+
         // Tạm hiển thị link từ local trước để UI mượt
         const currentUrl = localStorage.getItem('videoConfigUrl');
         document.getElementById('videoUrl').value = currentUrl || defaultVideoUrl;
+        updateVideoPreview(currentUrl || defaultVideoUrl);
 
         // Tải cấu hình mới nhất từ server
         try {
@@ -428,6 +461,7 @@
             if(data && data.url) {
                 document.getElementById('videoUrl').value = data.url;
                 localStorage.setItem('videoConfigUrl', data.url);
+                updateVideoPreview(data.url);
             }
         } catch (err) {
             console.error("Lỗi lấy cấu hình:", err);
@@ -493,6 +527,7 @@
 
                     localStorage.setItem('videoConfigUrl', url);
                     saveHistory(url);
+                    updateVideoPreview(url);
                 }
                 
                 const msg = document.getElementById('successMsg');
@@ -513,7 +548,7 @@
 
     function logout() {
         sessionStorage.removeItem('isAdminLoggedIn');
-        window.location.href = 'login.html';
+        window.location.href = 'index.html';
     }
 
     // Điều khiển Modal
@@ -553,6 +588,29 @@
         }
     }
 
+    function updateVideoPreview(url) {
+        const preview = document.getElementById('videoPreview');
+        if (preview.src !== url) {
+            preview.src = url;
+            preview.play().catch(e => console.log("Preview autoplay prevented", e));
+        }
+    }
+
+    function startClock() {
+        function updateClock() {
+            const now = new Date();
+            const days = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+            const dayName = days[now.getDay()];
+            
+            const timeString = now.toLocaleTimeString('vi-VN', { hour12: false });
+            const dateString = now.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            
+            document.getElementById('realtimeClock').innerText = `${timeString} - ${dayName}, ${dateString}`;
+        }
+        updateClock(); // Chạy ngay lập tức để không bị delay 1s
+        setInterval(updateClock, 1000);
+    }
+
     // Chạy khởi tạo
     init();
 
@@ -560,4 +618,3 @@
 
 </body>
 </html>
-
