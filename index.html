@@ -7,7 +7,10 @@
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f6;
+            background-image: url('https://cdn.hstatic.net/files/1000381168/file/hd-login2_87caa7b7872c4a5385c1b34e810069fa.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -15,71 +18,94 @@
             margin: 0;
         }
         .login-container {
-            background-color: white;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            background-color: transparent;
+            padding: 15px;
+            margin-top: -400px;
             width: 100%;
-            max-width: 350px;
+            max-width: 260px; /* Nhỏ gọn hơn */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-        h2 {
-            text-align: center;
+        .logo {
+            width: 130px; /* Thu nhỏ logo */
+            margin-bottom: 5px;
+        }
+        .login-subtitle {
+            font-size: 9px;
             color: #333;
-            margin-bottom: 25px;
+            margin-bottom: 15px;
+            text-align: center;
         }
         .form-group {
-            margin-bottom: 15px;
+            width: 100%;
+            margin-bottom: 10px;
         }
+        /* No labels in the screenshot, just placeholders */
         label {
-            display: block;
-            margin-bottom: 5px;
-            color: #666;
+            display: none;
         }
         input[type="text"], input[type="password"] {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+            padding: 8px 10px; /* Giảm padding */
+            border: 1px solid #ddd;
+            border-radius: 3px;
             box-sizing: border-box;
+            background-color: white;
+            font-size: 11px; /* Chữ nhỏ hơn */
         }
         button {
             width: 100%;
-            padding: 12px;
-            background-color: #D4AF37;
+            padding: 8px 10px; /* Giảm padding */
+            background-color: #1ab394;
             color: white;
             border: none;
-            border-radius: 5px;
-            font-size: 16px;
+            border-radius: 3px;
+            font-size: 12px;
             cursor: pointer;
-            margin-top: 10px;
-            font-weight: bold;
+            margin-top: 5px;
+            font-weight: 500;
+            transition: background-color 0.2s;
         }
         button:hover {
-            background-color: #c19b2e;
+            background-color: #16a085;
         }
         .error-msg {
-            color: red;
-            font-size: 14px;
-            margin-top: 10px;
+            color: #d93025;
+            font-size: 11px;
+            margin-bottom: 10px;
             text-align: center;
             display: none;
+            width: 100%;
+        }
+        .copyright {
+            margin-top: 15px;
+            font-size: 9px;
+            color: #555;
+            text-align: center;
         }
     </style>
 </head>
 <body>
 
 <div class="login-container">
-    <h2>Đăng nhập</h2>
+    <img src="https://cdn.hstatic.net/files/1000381168/file/logo_tgkc.png" alt="Logo" class="logo">
+    <div class="login-subtitle">Login in to see Admin Control Panel.</div>
+    
+    <div class="error-msg" id="errorMsg">Sai tài khoản hoặc mật khẩu!</div>
+
     <div class="form-group">
         <label for="username">Tên đăng nhập</label>
-        <input type="text" id="username" placeholder="Nhập admin">
+        <input type="text" id="username" placeholder="Username">
     </div>
     <div class="form-group">
         <label for="password">Mật khẩu</label>
-        <input type="password" id="password" placeholder="Nhập mật khẩu">
+        <input type="password" id="password" placeholder="Password">
     </div>
-    <div class="error-msg" id="errorMsg">Sai tài khoản hoặc mật khẩu!</div>
-    <button onclick="login()">Đăng nhập</button>
+    
+    <button onclick="login()">Log in</button>
+
+    <div class="copyright">Copyright(c) TGKC @ 2026 All Rights Reserved.</div>
 </div>
 
 <script>
